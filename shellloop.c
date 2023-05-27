@@ -1,39 +1,5 @@
 #include "main.h"
 
-/**
- * without_comment - deletes comments from the input
- *
- * @in: input string
- * Return: input without comments
- */
-char *without_comment(char *in)
-{
-	int i, up_to;
-
-	up_to = 0;
-	for (i = 0; in[i]; i++)
-	{
-		if (in[i] == '#')
-		{
-			if (i == 0)
-			{
-				free(in);
-				return (NULL);
-			}
-
-			if (in[i - 1] == ' ' || in[i - 1] == '\t' || in[i - 1] == ';')
-				up_to = i;
-		}
-	}
-
-	if (up_to != 0)
-	{
-		in = _realloc(in, i, up_to + 1);
-		in[up_to] = '\0';
-	}
-
-	return (in);
-}
 
 /**
  * shell_loop - Loop of shell
@@ -49,29 +15,78 @@ void shell_loop(data_shell *datash)
 	loop = 1;
 	while (loop == 1)
 	{
-		write(STDIN_FILENO, "^-^ ", 4);
-		input = read_line(&i_eof);
-		if (i_eof != -1)
-		{
-			input = without_comment(input);
-			if (input == NULL)
-				continue;
+		loop = 0;
+		free(input);
+	
+	}
+}
+const char *input = datash->args[0];
+	int i = 0;
 
-			if (check_syntax_error(datash, input) == 1)
-			{
-				datash->status = 2;
-				free(input);
+	while (input[i])
+	{
+		if (input[i] == '/')
+		{
+			if (input[i + 1] == '.')
 				continue;
-			}
-			input = rep_var(input, datash);
-			loop = split_commands(datash, input);
-			datash->counter += 1;
-			free(input);
+			i++;
+			break;
+		}
+		else if (input[i] == '.')
+		{
+			if (input[i + 1] == '.')
+				return 0;
+			if (input[i + 1] == '/')
+				continue;
+			else
+				break;
 		}
 		else
+			break;
+	}
+
+	if (i == 0)
+		return 0;
+
+	struct stat st;
+	if (stat(input + i, &st) == 0)
+		return i;
+
+	get_error(datash, 127);
+	return -1;
+}
+
+/**
+ * check_error - verifies if user has permissions to access
+ *
+ * @dir: destination directory
+ * @datash: data structure
+ * Return: 1 if there is an error, 0 if not
+ */
+int check_error(const char *dir, data_shell *datash)
+{
+	if (dir == NULL)
+	{
+		get_error(datash, 127);
+		return 1;
+	}
+
+	if (_strcmp(datash->args[0]) != 0)
+	{
+		if (access(dir, X_OK) == -1)
 		{
-			loop = 0;
-			free(input);
+			get_error(datash, 126);
+			return 1;
 		}
 	}
+	else
+	{
+		if (access(datash->args[0], X_OK) == -1)
+		{
+			get_error(datash, 126);
+			return 1;
+		}
+	}
+
+	return 0;
 }
