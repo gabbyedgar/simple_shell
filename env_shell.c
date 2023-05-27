@@ -1,27 +1,30 @@
 #include "main.h"
-
 /**
- * cmp_env_name - compares env variables names
- * with the name passed.
- * @nenv: name of the environment variable
- * @name: name passed
+ * @info: parameter struct
+ * @ptr: address of pointer to buffer, preallocated or NULL
+ * @length: size of preallocated ptr buffer if not NULL
  *
- * Return: 0 if are not equal. Another value if they are.
+ * Return: s
  */
-int cmp_env_name(const char *nenv, const char *name)
+int _getline(info_t *info, char **ptr, size_t *length)
 {
-	int i;
+	static char buf[READ_BUF_SIZE];
+	static size_t i, len;
+	size_t k;
+	ssize_t r = 0, s = 0;
+	char *p = NULL, *new_p = NULL, *c;
 
-	for (i = 0; nenv[i] != '='; i++)
-	{
-		if (nenv[i] != name[i])
-		{
-			return (0);
-		}
-	}
+	p = *ptr;
+	if (p && length)
+		s = *length;
+	if (i == len)
+		i = len = 0;
 
-	return (i + 1);
-}
+	r = read_buf(info, buf, &len);
+	if (r == -1 || (r == 0 && len == 0))
+		return (-1);
+
+
 
 /**
  * _getenv - get an environment variable
@@ -35,46 +38,8 @@ char *_getenv(const char *name, char **_environ)
 {
 	char *ptr_env;
 	int i, mov;
-
-	/* Initialize ptr_env value */
-	ptr_env = NULL;
-	mov = 0;
-	/* Compare all environment variables */
-	/* environ is declared in the header file */
-	for (i = 0; _environ[i]; i++)
-	{
-		/* If name and env are equal */
-		mov = cmp_env_name(_environ[i], name);
-		if (mov)
-		{
-			ptr_env = _environ[i];
-			break;
 		}
-	}
-
-	return (ptr_env + mov);
+	}	return (ptr_env + mov);
 }
 
-/**
- * _env - prints the evironment variables
- *
- * @datash: data relevant.
- * Return: 1 on success.
- */
-int _env(data_shell *datash)
-{
-	int i, j;
 
-	for (i = 0; datash->_environ[i]; i++)
-	{
-
-		for (j = 0; datash->_environ[i][j]; j++)
-			;
-
-		write(STDOUT_FILENO, datash->_environ[i], j);
-		write(STDOUT_FILENO, "\n", 1);
-	}
-	datash->status = 0;
-
-	return (1);
-}
