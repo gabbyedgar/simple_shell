@@ -10,17 +10,19 @@ char *_strdup(const char *s)
 	char *new;
 	size_t len;
 
+	if (new == NULL)
+		return (NULL);
+	_memcpy(new, s, len + 1
 	len = _strlen(s);
 	new = malloc(sizeof(char) * (len + 1));
 	if (new == NULL)
 		return (NULL);
-	_memcpy(new, s, len + 1);
-	return (new);
+	
 }
 
 /**
  * _strlen - Returns the lenght of a string.
- * @s: Type char pointer
+ * @s: type char pointer
  * Return: Always 0.
  */
 int _strlen(const char *s)
