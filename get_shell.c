@@ -1,40 +1,39 @@
 #include "main.h"
 
 /**
- * get_error - calls the error according the builtin, syntax or permission
- * @datash: data structure that contains arguments
- * @eval: error value
- * Return: error
+ * cmd_exec - executes command lines
+ *
+ * @datash: data relevant (args and input)
+ * Return: 1 on success.
  */
-int get_error(data_shell *datash, int eval)
+int cmd_exec(data_shell *datash)
 {
-	char *error;
+	int exec = is_executable(datash);
+	if (exec == -1)
+		return 1;
 
-	switch (eval)
+	char *dir;
+	if (exec == 0)
 	{
-	case -1:
-		error = error_env(datash);
-		break;
-	case 126:
-		error = error_path_126(datash);
-		break;
-	case 127:
-		error = error_not_found(datash);
-		break;
-	case 2:
-		if (_strcmp("exit", datash->args[0]) == 0)
-			error = error_exit_shell(datash);
-		else if (_strcmp("cd", datash->args[0]) == 0)
-			error = error_get_cd(datash);
-		break;
+		dir = _which(datash->args[0], datash->_environ);
+		if (check_error_cmd(dir, datash) == 1)
+			return 1;
+	}
+	else
+	{
+		dir = datash->args[0];
 	}
 
-	if (error)
+	pid_t pd = fork();
+	if (pd == 0)
 	{
-		write(STDERR_FILENO, error, _strlen(error));
-		free(error);
+		execve(dir + exec, datash->args, datash->_environ);
+	}
+	else if (pd < 0)
+	{
+		perror(datash->av[0]);
+		return 1;
 	}
 
-	datash->status = eval;
 	return (eval);
 }
