@@ -1,24 +1,28 @@
 #include "main.h"
 
 /**
- * get_builtin - builtin that pais the command in the arg
- * @cmd: command
- * Return: function pointer of the builtin command
+ * @datash: data structure that contains arguments
+ * @eval: error value
+ * Return: error
  */
-int (*get_builtin(char *cmd))(data_shell *)
+int get_error(data_shell *datash, int eval)
 {
-	builtin_t builtin[] = {
-		{ "env", _env },
-		{ "exit", exit_shell },
-		{ "setenv", _setenv },
-		{ "unsetenv", _unsetenv },
-		{ "cd", cd_shell },
-		{ "help", get_help },
-		{ NULL, NULL }
+	struct {
+		int error_code;
+		char* (*error_function)(data_shell *);
+	} error_codes[] = {
+		{-1, error_env},
+		{126, error_path_126},
+		{127, error_not_found},
+		{2, error_exit_cd}
 	};
 	int i;
 
-	for (i = 0; builtin[i].name; i++)
+	char *error = NULL;
+
+	for (i = 0; i < sizeof(error_codes) / sizeof(error_codes[0]); i++)
+	{
+
 	{
 		if (_strcmp(builtin[i].name, cmd) == 0)
 			break;
