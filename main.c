@@ -1,73 +1,80 @@
 #include "main.h"
 
+#include "shell.h"
+
 /**
- * free_data - frees data structure
- *
- * @datash: data structure
- * Return: no return
+ * _strcat - concatenate two strings.
+ * @dest: destination string.
+ * @src: source string.
+ * Return: pointer to the resulting string.
  */
-void free_data(data_shell *datash)
+char *_strcat(char *dest, const char *src)
 {
-	unsigned int i;
+	char *temp = dest;
 
-	for (i = 0; datash->_environ[i]; i++)
-	{
-		free(datash->_environ[i]);
-	}
+	while (*temp)
+		temp++;
 
-	free(datash->_environ);
-	free(datash->pid);
+	while (*src)
+		*temp++ = *src++;
+
+	*temp = '\0';
+
+	return dest;
 }
 
 /**
- * set_data - Initialize data structure
- *
- * @datash: data structure
- * @av: argument vector
- * Return: no return
+ * _strcpy - copy a string.
+ * @dest: destination string.
+ * @src: source string.
+ * Return: pointer to the destination string.
  */
-void set_data(data_shell *datash, char **av)
+char *_strcpy(char *dest, char *src)
 {
-	unsigned int i;
+	char *temp = dest;
 
-	datash->av = av;
-	datash->input = NULL;
-	datash->args = NULL;
-	datash->status = 0;
-	datash->counter = 1;
-
-	for (i = 0; environ[i]; i++)
+	while ((*temp++ = *src++))
 		;
 
-	datash->_environ = malloc(sizeof(char *) * (i + 1));
-
-	for (i = 0; environ[i]; i++)
-	{
-		datash->_environ[i] = _strdup(environ[i]);
-	}
-
-	datash->_environ[i] = NULL;
-	datash->pid = aux_itoa(getpid());
+	return dest;
 }
 
 /**
- * main - Entry point
- *
- * @ac: argument count
- * @av: argument vector
- *
- * Return: 0 on success.
+ * _strcmp - compare two strings.
+ * @s1: first string.
+ * @s2: second string.
+ * Return: 0 if the strings are equal, a positive value if s1 is greater,
+ *         and a negative value if s2 is greater.
  */
-int main(int ac, char **av)
+int _strcmp(char *s1, char *s2)
 {
-	data_shell datash;
-	(void) ac;
+	while (*s1 && (*s1 == *s2))
+	{
+		s1++;
+		s2++;
+	}
 
-	signal(SIGINT, get_sigint);
-	set_data(&datash, av);
-	shell_loop(&datash);
-	free_data(&datash);
-	if (datash.status < 0)
-		return (255);
-	return (datash.status);
+	return (*s1 - *s2);
+}
+
+/**
+ * _strchr - locate a character in a string.
+ * @s: string.
+ * @c: character.
+ * Return: pointer to the first occurrence of the character c,
+ *         or NULL if the character is not found.
+ */
+char *_strchr(char *s, char c)
+{
+	while (*s)
+	{
+		if (*s == c)
+			return s;
+		s++;
+	}
+
+	if (*s == c)
+		return s;
+
+	return NULL;
 }
