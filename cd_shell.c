@@ -1,84 +1,74 @@
 #include "main.h"
 
 /**
- * cd_dot - changes to the parent directory
+**
+ * cd_to_home - changes to home directory
  *
  * @datash: data relevant (environ)
- *
  * Return: no return
  */
-void cd_dot(data_shell *datash)
+void cd_to_home(data_shell *datash)
 {
+	char *p_pwd, *home;
 	char pwd[PATH_MAX];
-	char *dir, *cp_pwd, *cp_strtok_pwd;
 
 	getcwd(pwd, sizeof(pwd));
-	cp_pwd = _strdup(pwd);
-	set_env("OLDPWD", cp_pwd, datash);
-	dir = datash->args[1];
-	if (_strcmp(".", dir) == 0)
-	{
-		set_env("PWD", cp_pwd, datash);
-		free(cp_pwd);
-		return;
-	}
-	if (_strcmp("/", cp_pwd) == 0)
-	{
-		free(cp_pwd);
-		return;
-	}
-	cp_strtok_pwd = cp_pwd;
-	rev_string(cp_strtok_pwd);
-	cp_strtok_pwd = _strtok(cp_strtok_pwd, "/");
-	if (cp_strtok_pwd != NULL)
-	{
-		cp_strtok_pwd = _strtok(NULL, "\0");
+	p_pwd = _strdup(pwd);
+	home = _getenv("HOME", datash->_environ);
 
-		if (cp_strtok_pwd != NULL)
-			rev_string(cp_strtok_pwd);
-	}
-	if (cp_strtok_pwd != NULL)
+	if (home == NULL)
 	{
-		chdir(cp_strtok_pwd);
-		set_env("PWD", cp_strtok_pwd, datash);
-	}
-	else
-	{
-		chdir("/");
-		set_env("PWD", "/", datash);
-	}
-	datash->status = 0;
-	free(cp_pwd);
-}
-
-/**
- * cd_to - changes to a directory given
- * by the user
- *
- * @datash: data relevant (directories)
- * Return: no return
- */
-void cd_to(data_shell *datash)
-{
-	char pwd[PATH_MAX];
-	char *dir, *cp_pwd, *cp_dir;
-
-	getcwd(pwd, sizeof(pwd));
-
-	dir = datash->args[1];
-	if (chdir(dir) == -1)
-	{
-		get_error(datash, 2);
+		set_env("OLDPWD", p_pwd, datash);
+		free(p_pwd);
 		return;
 	}
 
-	cp_pwd = _strdup(pwd);
-	set_env("OLDPWD", cp_pwd, datash);
+	home = _getenv("HOME", datash->_environ);
 
-	cp_dir = _strdup(dir);
-	set_env("PWD", cp_dir, datash);
+	if (home == NULL)
+	{
+		set_env("OLDPWD", p_pwd, datash);
+		free(p_pwd);
+		return;
+ *if (datash->args[1] == NULL)
+	{
+		get_error(datash, -1);
+		return 1;
+	}
 
-	free(cp_pwd);
+	int i, j;
+	int found = 0;
+	size_t env_size = 0;
+
+	for (i = 0; datash->_environ[i] != NULL; i++)
+	{
+		char *var_env = _strdup(datash->_environ[i]);
+		char *name_env = _strtok(var_env, "=");
+
+		if (_strcmp(name_env, datash->args[1]) == 0)
+		{
+			found = 1;
+			free(datash->_environ[i]);
+		}
+		else
+		{
+			env_size += sizeof(char *);
+		}
+
+		free(var_env);
+	}
+
+	if (!found)
+	{
+		get_error(datash, -1);
+		return 1;
+	}
+
+	char **realloc_environ = malloc(env_size + sizeof(char *));
+	if (realloc_environ == NULL)
+		return 1;
+
+
 	free(cp_dir);
 
 	datash->status = 0;
@@ -142,16 +132,7 @@ void cd_to_home(data_shell *datash)
 	getcwd(pwd, sizeof(pwd));
 	p_pwd = _strdup(pwd);
 
-	home = _getenv("HOME", datash->_environ);
-
-	if (home == NULL)
-	{
-		set_env("OLDPWD", p_pwd, datash);
-		free(p_pwd);
-		return;
-	}
-
-	if (chdir(home) == -1)
+		if (chdir(home) == -1)
 	{
 		get_error(datash, 2);
 		free(p_pwd);
